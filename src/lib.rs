@@ -54,13 +54,14 @@ impl<T: SobolType> Sobol<T> {
                                             {} dimensions but was configured for {}.", params.max_dims(), dims);
         
         let dir_values = Self::init_direction_vals::<P>(dims, res, params);
-        let dir_values_transposed = (0..dir_values[0].len())
+        // Transpose dir values for better cache locality
+        let dir_values = (0..dir_values[0].len())
             .map(|i| dir_values.iter().map(|inner| inner[i].clone()).collect::<Vec<_>>())
             .collect();
         Sobol {
             dims,
             resolution: res,
-            dir_vals: dir_values_transposed,
+            dir_vals: dir_values,
             count: T::IT::zero(),
             max_len: T::IT::max_value() >> (T::IT::BITS - res),
             previous: None

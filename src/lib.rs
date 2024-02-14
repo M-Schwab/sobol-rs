@@ -52,11 +52,15 @@ impl<T: SobolType> Sobol<T> {
 
         assert!(dims <= params.max_dims(), "Parameters for this Sobol sequence support values with a maximum of \
                                             {} dimensions but was configured for {}.", params.max_dims(), dims);
-
+        
+        let dir_values = Self::init_direction_vals::<P>(dims, res, params);
+        let dir_values_transposed = (0..dir_values[0].len())
+            .map(|i| dir_values.iter().map(|inner| inner[i].clone()).collect::<Vec<_>>())
+            .collect();
         Sobol {
             dims,
             resolution: res,
-            dir_vals: Self::init_direction_vals::<P>(dims, res, params),
+            dir_vals: dir_values_transposed,
             count: T::IT::zero(),
             max_len: T::IT::max_value() >> (T::IT::BITS - res),
             previous: None
@@ -119,9 +123,9 @@ impl<T: SobolType> Iterator for Sobol<T> {
                 Some(previous) => {
                     let a = self.count - T::IT::one();
                     let c = Self::rightmost_zero(a);
-                    self.dir_vals.iter()
-                        .enumerate()
-                        .map(|(dim, dirs)| previous[dim] ^ dirs[c as usize])
+                    self.dir_vals[c as usize].iter()
+                        .zip(previous)
+                        .map(|(p, dir)| *p ^ *dir)
                         .collect::<Vec<T::IT>>()
                 }
             };
@@ -135,6 +139,28 @@ impl<T: SobolType> Iterator for Sobol<T> {
 
             Some(next_render)
         } else { None }
+    }
+
+    fn nth(&mut self, n: usize) -> Option<Self::Item> {
+        for _ in 0..n {
+            if self.count < self.max_len {
+                let next = match &self.previous {
+                    None => vec![T::IT::zero(); self.dims],
+                    Some(previous) => {
+                        let a = self.count - T::IT::one();
+                        let c = Self::rightmost_zero(a);
+                        self.dir_vals[c as usize].iter()
+                            .zip(previous)
+                            .map(|(p, dir)| *p ^ *dir)
+                            .collect::<Vec<T::IT>>()
+                    }
+                };
+    
+                self.count += T::IT::one();
+                self.previous = Some(next);
+            } else { break }
+        }
+        self.next()
     }
 }
 

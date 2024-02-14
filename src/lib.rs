@@ -41,7 +41,7 @@ impl<T: SobolType> Sobol<T> {
      * Constructs a new sequence of given resolution. Resolution is the number of bits used in the
      * computation of the sequence and by default is the size of the underlying type. This
      * constructor is useful for reducing the number of cycles necessary to generate each point when the
-     * length of the sequence is not expected to approach it's theorectical maximum (2^res).
+     * length of the sequence is not expected to approach it's theoretically maximum (2^res).
      **/
     pub fn new_with_resolution<P>(dims: usize, params: &dyn SobolParams<P>, resolution: Option<usize>) -> Self
         where T::IT: LossyFrom<P> {

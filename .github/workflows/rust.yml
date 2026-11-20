@@ -14,10 +14,9 @@ jobs:
           - nightly
     steps:
     - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.version }}
-        override: true
     - name: clean
       run: cargo clean
     - name: Run tests
@@ -29,10 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
+    - uses: dtolnay/rust-toolchain@stable
     - name: clean
       run: cargo clean
     - name: Build

@@ -23,20 +23,3 @@ jobs:
       run: cargo test --verbose
       env:
         RUST_BACKTRACE: 1
-
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: dtolnay/rust-toolchain@stable
-    - name: clean
-      run: cargo clean
-    - name: Build
-      run: cargo build --verbose
-      env:
-        RUST_BACKTRACE: 1
-    - name: Run cargo-tarpaulin
-      uses: actions-rs/tarpaulin@v0.1
-      with:
-        version: '0.10.2'
-        args: '--coveralls ${{ secrets.COVERALLS_TOKEN }} -- --test-threads 1'
